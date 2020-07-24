@@ -18,10 +18,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis"
-	"github.com/spf13/cobra"
 	"sync"
 	"time"
+
+	"github.com/go-redis/redis"
+	"github.com/spf13/cobra"
 )
 
 var ctx = context.Background()
@@ -37,11 +38,11 @@ func Consume(wg *sync.WaitGroup, id int) {
 
 	fmt.Println("Consume thread starting up: ", id, config.Stream, config.Name)
 
-	c.XGroupCreateMkStream(ctx, config.Stream, "mygroup", "0")
+	c.XGroupCreateMkStream(config.Stream, "mygroup", "0")
 
 	for {
 		// XREADGROUP GROUP $GroupName $ConsumerName BLOCK 2000 COUNT 10 STREAMS mystream >
-		results, err := c.XReadGroup(ctx, &redis.XReadGroupArgs{
+		results, err := c.XReadGroup(&redis.XReadGroupArgs{
 			Group:    "mygroup",
 			Consumer: config.Name,
 			Streams:  []string{config.Stream, ">"},
@@ -54,21 +55,21 @@ func Consume(wg *sync.WaitGroup, id int) {
 			fmt.Println(err)
 		}
 		/*
-		[
-			{
-				teststream: [
-					{
-						1590965499617-7: map[keyname: PAYLOAD ]
-					}
-				]
-			}
-		]
+			[
+				{
+					teststream: [
+						{
+							1590965499617-7: map[keyname: PAYLOAD ]
+						}
+					]
+				}
+			]
 
-		 */
+		*/
 
 		for _, res := range results {
 			fmt.Println(res.Messages[0].ID)
-			c.XDel(ctx, config.Stream, res.Messages[0].ID)
+			c.XDel(config.Stream, res.Messages[0].ID)
 
 		}
 
@@ -80,8 +81,8 @@ func Consume(wg *sync.WaitGroup, id int) {
 var cmdConsume = &cobra.Command{
 	Use:   "consume",
 	Short: "Consumer description here..",
-	Long: `Longer description goes here.. but I have nothing to say.`,
-	Args: cobra.MinimumNArgs(0),
+	Long:  `Longer description goes here.. but I have nothing to say.`,
+	Args:  cobra.MinimumNArgs(0),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Consume: ")
@@ -95,8 +96,6 @@ var cmdConsume = &cobra.Command{
 		wg.Wait()
 	},
 }
-
-
 
 func init() {
 	// Here you will define your flags and configuration settings.

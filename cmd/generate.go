@@ -17,10 +17,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/go-redis/redis"
 	"io/ioutil"
 	"sync"
 	"time"
+
+	"github.com/go-redis/redis"
 
 	"github.com/spf13/cobra"
 )
@@ -39,7 +40,7 @@ func Generate(wg *sync.WaitGroup, id int) {
 	for {
 		for n := int64(0); n < config.Qty; n++ {
 			//c.Send("XADD", config.Stream, "*", config.Key, config.Payload)
-			if _, err := c.XAdd(ctx, &redis.XAddArgs{
+			if _, err := c.XAdd(&redis.XAddArgs{
 				Stream:       config.Stream,
 				MaxLen:       0,
 				MaxLenApprox: 0,
@@ -58,8 +59,8 @@ func Generate(wg *sync.WaitGroup, id int) {
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generator description here..",
-	Long: `Longer description goes here.. but I have nothing to say.`,
-	Args: cobra.MinimumNArgs(0),
+	Long:  `Longer description goes here.. but I have nothing to say.`,
+	Args:  cobra.MinimumNArgs(0),
 
 	Run: func(cmd *cobra.Command, args []string) {
 
